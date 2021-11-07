@@ -83,9 +83,8 @@ def get_video_url(video_id=None):
                 logger.error(f'【查询视频信息】请求返回数据中item_list为空，video_id：{video_id}')
                 return
             try:
-                video_url = item_list[0]['video']['play_addr']['url_list'][0]
-                video_url = video_url.replace('playwm', 'play')
-                video_url = video_url.replace('720p', '1080p')
+                vid = item_list[0]['video']['vid']
+                video_url = f'https://aweme.snssdk.com/aweme/v1/play/?video_id={vid}&ratio=2160p&line=0'
             except Exception as e:
                 logger.error(f'【查询视频信息】：{e}')
                 return
