@@ -8,20 +8,33 @@ import json
 
 from flask import Flask, request
 
-import get_dy_video_url
+import get_dy_url
 
 app = Flask(__name__)
 
 
-@app.route('/execute', methods=['POST'])
-def execute():
+@app.route('/execute/video', methods=['POST'])
+def execute_video():
     if request.method == "POST":
         result = {'code': 200, 'url': ''}
         data = request.get_data()
         data_json = json.loads(data)
         share_text = data_json.get('share_text')
         if share_text is not None:
-            video_url = get_dy_video_url.main(share_text)
+            video_url = get_dy_url.main_video(share_text)
+            result['url'] = video_url
+        return json.dumps(result)
+
+
+@app.route('/execute/image', methods=['POST'])
+def execute_image():
+    if request.method == "POST":
+        result = {'code': 200, 'url': ''}
+        data = request.get_data()
+        data_json = json.loads(data)
+        share_text = data_json.get('share_text')
+        if share_text is not None:
+            video_url = get_dy_url.main_image(share_text)
             result['url'] = video_url
         return json.dumps(result)
 

@@ -92,6 +92,43 @@ def get_video_url(video_id=None):
             return video_url
 
 
+def get_image_url(video_id=None):
+    if video_id is None:
+        return
+    query_url = f'https://www.iesdouyin.com/web/api/v2/aweme/iteminfo/?item_ids={video_id}'
+    try:
+        logger.info(f'【查询图片信息】：url为{query_url}')
+        response = requests.get(query_url, headers=get_headers(), timeout=10)
+    except Exception as e:
+        logger.error(f'【查询图片信息】：{e}')
+        return
+
+    if response.status_code == 200:
+        result = response.json()
+        if result is None:
+            logger.error(f'【查询图片信息】请求返回数据为空，video_id：{video_id}')
+        else:
+            if result.get('status_code') != 0:
+                logger.error(f'【查询图片信息】请求返回status_code不为0，video_id：{video_id}')
+                return
+            item_list = result.get('item_list')
+            if item_list is None or len(item_list) == 0:
+                logger.error(f'【查询图片信息】请求返回数据中item_list为空，video_id：{video_id}')
+                return
+            try:
+                images = item_list[0]['images']
+                image_url_list = []
+                if images is not None and len(images) > 0:
+                    for image in images:
+                        image_url_list.append(image['url_list'][0])
+                    pass
+            except Exception as e:
+                logger.error(f'【查询图片信息】：{e}')
+                return
+            logger.info(f'【查询图片信息】：图片源地址为{image_url_list}')
+            return image_url_list
+
+
 def get_headers():
     return dict({
         'User-Agent': random.choice(USER_AGENTS),
@@ -107,7 +144,7 @@ def get_headers():
     })
 
 
-def main(input_str):
+def get_video_id(input_str):
     search_result = re.search(r'https.*/', input_str)
     if search_result is None:
         logger.error(f'输入的链接有误：{input_str}')
@@ -119,4 +156,14 @@ def main(input_str):
         if temp_url.endswith('/'):
             temp_url = temp_url[:-1]
         video_id = temp_url.split('/').pop()
-        return get_video_url(video_id)
+        return video_id
+
+
+def main_video(input_str):
+    video_id = get_video_id(input_str)
+    return get_video_url(video_id)
+
+
+def main_image(input_str):
+    video_id = get_video_id(input_str)
+    return get_image_url(video_id)
